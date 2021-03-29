@@ -1,0 +1,2071 @@
+bmsce@bmsce-Precision-T1700:~$ cd cassandra
+bmsce@bmsce-Precision-T1700:~/cassandra$ cd apache-cassandra-3.11.0
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0$ cd bin
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0/bin$ ./cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 3.11.4 | CQL spec 3.4.4 | Native protocol v4]
+Use HELP for help.
+cqlsh> CREATE KEYSPACE employee WITH REPLICATION={'class':'SimpleStrategy','replication_factor':1};
+cqlsh> Describe keyspaces
+
+system_schema  system_auth  system  system_distributed  employee  system_traces
+
+cqlsh> USE employee
+   ... l
+   ... 
+cqlsh> USE employee;
+cqlsh:employee> CREATE TABLE employee_info(
+            ... emp_id int PRIMARY KEY,
+            ... emp_name text,
+            ... designation text,
+            ... date_of_joining timestamp,
+            ... salary double,
+            ... dept_name text);
+cqlsh:employee> DESCRIBE tables
+
+employee_info
+
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining | dept_name | designation | emp_name | salary
+--------+-----------------+-----------+-------------+----------+--------
+
+(0 rows)
+cqlsh:employee> BEGIN BATCH
+            ...                ... INSERT INTO 
+            ...                ... student_info(RollNo,StudName,DateofJoining,LastExamPercent)
+            ...                ... VALUES(1,'Micheal Storm','2012-03-29',69.6)
+            ...                ... INSERT INTO student_info
+            ...                ... (RollNo,StudName,DateofJoining,LastExamPercent) VALUES
+            ...                ... (2,'Stephen Fox','2013-02-27',72.5)
+            ...                ... APPLY BATCH;
+cqlsh:employee> BEGIN BATCH
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (001, '2020-03-13','TESTING', 'JR ASST', 'MANU', 3000)
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (121, '2020-04-28','SECUIRTY', 'SR ASST', 'PRAMOD', 5000)
+            ... APPLY BATCH;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name | designation | emp_name | salary
+--------+---------------------------------+-----------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |   TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  SECUIRTY |     SR ASST |   PRAMOD |   5000
+
+(2 rows)
+cqlsh:employee> UPDATE employee_info SET emp_name='Rajath', dept_name='OPERATIONS' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+
+(2 rows)
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000);
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info order by salary;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> SORT SALARY FROM EMPLOYEE_INFO
+            ... ;
+SyntaxException: line 1:0 no viable alternative at input 'SORT' ([SORT]...)
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY salary ASC;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000)
+cqlsh:employee> select * from employee_info ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info WHERE date_of_joining>='2020-03-01'  ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+cqlsh:employee> alter emp_info
+            ... ADD PROJECT TYPE TEXT
+            ... ;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter emp_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'employee_info' ([alter] employee_info...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:43 mismatched input 'TEXT' expecting EOF (...table employee_info ADD PROJECT TYPE [TEXT]...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...table employee_info ADD PROJECT TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project text;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |    null |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='TESTING' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='P1' WHERE emp_id=1;
+cqlsh:employee> UPDATE employee_info SET project='P2' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> update employee_info USING TTL 50 SET dept_name='DEVELOPMENT' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+bmsce@bmsce-Precision-T1700:~$ cd cassandra
+bmsce@bmsce-Precision-T1700:~/cassandra$ cd apache-cassandra-3.11.0
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0$ cd bin
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0/bin$ ./cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 3.11.4 | CQL spec 3.4.4 | Native protocol v4]
+Use HELP for help.
+cqlsh> CREATE KEYSPACE employee WITH REPLICATION={'class':'SimpleStrategy','replication_factor':1};
+cqlsh> Describe keyspaces
+
+system_schema  system_auth  system  system_distributed  employee  system_traces
+
+cqlsh> USE employee
+   ... l
+   ... 
+cqlsh> USE employee;
+cqlsh:employee> CREATE TABLE employee_info(
+            ... emp_id int PRIMARY KEY,
+            ... emp_name text,
+            ... designation text,
+            ... date_of_joining timestamp,
+            ... salary double,
+            ... dept_name text);
+cqlsh:employee> DESCRIBE tables
+
+employee_info
+
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining | dept_name | designation | emp_name | salary
+--------+-----------------+-----------+-------------+----------+--------
+
+(0 rows)
+cqlsh:employee> BEGIN BATCH
+            ...                ... INSERT INTO 
+            ...                ... student_info(RollNo,StudName,DateofJoining,LastExamPercent)
+            ...                ... VALUES(1,'Micheal Storm','2012-03-29',69.6)
+            ...                ... INSERT INTO student_info
+            ...                ... (RollNo,StudName,DateofJoining,LastExamPercent) VALUES
+            ...                ... (2,'Stephen Fox','2013-02-27',72.5)
+            ...                ... APPLY BATCH;
+cqlsh:employee> BEGIN BATCH
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (001, '2020-03-13','TESTING', 'JR ASST', 'MANU', 3000)
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (121, '2020-04-28','SECUIRTY', 'SR ASST', 'PRAMOD', 5000)
+            ... APPLY BATCH;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name | designation | emp_name | salary
+--------+---------------------------------+-----------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |   TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  SECUIRTY |     SR ASST |   PRAMOD |   5000
+
+(2 rows)
+cqlsh:employee> UPDATE employee_info SET emp_name='Rajath', dept_name='OPERATIONS' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+
+(2 rows)
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000);
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info order by salary;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> SORT SALARY FROM EMPLOYEE_INFO
+            ... ;
+SyntaxException: line 1:0 no viable alternative at input 'SORT' ([SORT]...)
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY salary ASC;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000)
+cqlsh:employee> select * from employee_info ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info WHERE date_of_joining>='2020-03-01'  ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+cqlsh:employee> alter emp_info
+            ... ADD PROJECT TYPE TEXT
+            ... ;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter emp_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'employee_info' ([alter] employee_info...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:43 mismatched input 'TEXT' expecting EOF (...table employee_info ADD PROJECT TYPE [TEXT]...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...table employee_info ADD PROJECT TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project text;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |    null |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='TESTING' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='P1' WHERE emp_id=1;
+cqlsh:employee> UPDATE employee_info SET project='P2' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> update employee_info USING TTL 50 SET dept_name='DEVELOPMENT' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dbmsce@bmsce-Precision-T1700:~$ cd cassandra
+bmsce@bmsce-Precision-T1700:~/cassandra$ cd apache-cassandra-3.11.0
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0$ cd bin
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0/bin$ ./cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 3.11.4 | CQL spec 3.4.4 | Native protocol v4]
+Use HELP for help.
+cqlsh> CREATE KEYSPACE employee WITH REPLICATION={'class':'SimpleStrategy','replication_factor':1};
+cqlsh> Describe keyspaces
+
+system_schema  system_auth  system  system_distributed  employee  system_traces
+
+cqlsh> USE employee
+   ... l
+   ... 
+cqlsh> USE employee;
+cqlsh:employee> CREATE TABLE employee_info(
+            ... emp_id int PRIMARY KEY,
+            ... emp_name text,
+            ... designation text,
+            ... date_of_joining timestamp,
+            ... salary double,
+            ... dept_name text);
+cqlsh:employee> DESCRIBE tables
+
+employee_info
+
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining | dept_name | designation | emp_name | salary
+--------+-----------------+-----------+-------------+----------+--------
+
+(0 rows)
+cqlsh:employee> BEGIN BATCH
+            ...                ... INSERT INTO 
+            ...                ... student_info(RollNo,StudName,DateofJoining,LastExamPercent)
+            ...                ... VALUES(1,'Micheal Storm','2012-03-29',69.6)
+            ...                ... INSERT INTO student_info
+            ...                ... (RollNo,StudName,DateofJoining,LastExamPercent) VALUES
+            ...                ... (2,'Stephen Fox','2013-02-27',72.5)
+            ...                ... APPLY BATCH;
+cqlsh:employee> BEGIN BATCH
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (001, '2020-03-13','TESTING', 'JR ASST', 'MANU', 3000)
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (121, '2020-04-28','SECUIRTY', 'SR ASST', 'PRAMOD', 5000)
+            ... APPLY BATCH;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name | designation | emp_name | salary
+--------+---------------------------------+-----------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |   TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  SECUIRTY |     SR ASST |   PRAMOD |   5000
+
+(2 rows)
+cqlsh:employee> UPDATE employee_info SET emp_name='Rajath', dept_name='OPERATIONS' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+
+(2 rows)
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000);
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info order by salary;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> SORT SALARY FROM EMPLOYEE_INFO
+            ... ;
+SyntaxException: line 1:0 no viable alternative at input 'SORT' ([SORT]...)
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY salary ASC;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000)
+cqlsh:employee> select * from employee_info ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info WHERE date_of_joining>='2020-03-01'  ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+cqlsh:employee> alter emp_info
+            ... ADD PROJECT TYPE TEXT
+            ... ;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter emp_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'employee_info' ([alter] employee_info...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:43 mismatched input 'TEXT' expecting EOF (...table employee_info ADD PROJECT TYPE [TEXT]...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...table employee_info ADD PROJECT TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project text;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |    null |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='TESTING' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='P1' WHERE emp_id=1;
+cqlsh:employee> UPDATE employee_info SET project='P2' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |  bmsce@bmsce-Precision-T1700:~$ cd cassandra
+bmsce@bmsce-Precision-T1700:~/cassandra$ cd apache-cassandra-3.11.0
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0$ cd bin
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0/bin$ ./cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 3.11.4 | CQL spec 3.4.4 | Native protocol v4]
+Use HELP for help.
+cqlsh> CREATE KEYSPACE employee WITH REPLICATION={'class':'SimpleStrategy','replication_factor':1};
+cqlsh> Describe keyspaces
+
+system_schema  system_auth  system  system_distributed  employee  system_traces
+
+cqlsh> USE employee
+   ... l
+   ... 
+cqlsh> USE employee;
+cqlsh:employee> CREATE TABLE employee_info(
+            ... emp_id int PRIMARY KEY,
+            ... emp_name text,
+            ... designation text,
+            ... date_of_joining timestamp,
+            ... salary double,
+            ... dept_name text);
+cqlsh:employee> DESCRIBE tables
+
+employee_info
+
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining | dept_name | designation | emp_name | salary
+--------+-----------------+-----------+-------------+----------+--------
+
+(0 rows)
+cqlsh:employee> BEGIN BATCH
+            ...                ... INSERT INTO 
+            ...                ... student_info(RollNo,StudName,DateofJoining,LastExamPercent)
+            ...                ... VALUES(1,'Micheal Storm','2012-03-29',69.6)
+            ...                ... INSERT INTO student_info
+            ...                ... (RollNo,StudName,DateofJoining,LastExamPercent) VALUES
+            ...                ... (2,'Stephen Fox','2013-02-27',72.5)
+            ...                ... APPLY BATCH;
+cqlsh:employee> BEGIN BATCH
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (001, '2020-03-13','TESTING', 'JR ASST', 'MANU', 3000)
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (121, '2020-04-28','SECUIRTY', 'SR ASST', 'PRAMOD', 5000)
+            ... APPLY BATCH;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name | designation | emp_name | salary
+--------+---------------------------------+-----------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |   TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  SECUIRTY |     SR ASST |   PRAMOD |   5000
+
+(2 rows)
+cqlsh:employee> UPDATE employee_info SET emp_name='Rajath', dept_name='OPERATIONS' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+
+(2 rows)
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000);
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info order by salary;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> SORT SALARY FROM EMPLOYEE_INFO
+            ... ;
+SyntaxException: line 1:0 no viable alternative at input 'SORT' ([SORT]...)
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY salary ASC;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000)
+cqlsh:employee> select * from employee_info ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info WHERE date_of_joining>='2020-03-01'  ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+cqlsh:employee> alter emp_info
+            ... ADD PROJECT TYPE TEXT
+            ... ;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter emp_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'employee_info' ([alter] employee_info...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:43 mismatched input 'TEXT' expecting EOF (...table employee_info ADD PROJECT TYPE [TEXT]...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...table employee_info ADD PROJECT TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project text;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |    null |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='TESTING' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)bmsce@bmsce-Precision-T1700:~$ cd cassandra
+bmsce@bmsce-Precision-T1700:~/cassandra$ cd apache-cassandra-3.11.0
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0$ cd bin
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0/bin$ ./cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 3.11.4 | CQL spec 3.4.4 | Native protocol v4]
+Use HELP for help.
+cqlsh> CREATE KEYSPACE employee WITH REPLICATION={'class':'SimpleStrategy','replication_factor':1};
+cqlsh> Describe keyspaces
+
+system_schema  system_auth  system  system_distributed  employee  system_traces
+
+cqlsh> USE employee
+   ... l
+   ... 
+cqlsh> USE employee;
+cqlsh:employee> CREATE TABLE employee_info(
+            ... emp_id int PRIMARY KEY,
+            ... emp_name text,
+            ... designation text,
+            ... date_of_joining timestamp,
+            ... salary double,
+            ... dept_name text);
+cqlsh:employee> DESCRIBE tables
+
+employee_info
+
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining | dept_name | designation | emp_name | salary
+--------+-----------------+-----------+-------------+----------+--------
+
+(0 rows)
+cqlsh:employee> BEGIN BATCH
+            ...                ... INSERT INTO 
+            ...                ... student_info(RollNo,StudName,DateofJoining,LastExamPercent)
+            ...                ... VALUES(1,'Micheal Storm','2012-03-29',69.6)
+            ...                ... INSERT INTO student_info
+            ...                ... (RollNo,StudName,DateofJoining,LastExamPercent) VALUES
+            ...                ... (2,'Stephen Fox','2013-02-27',72.5)
+            ...                ... APPLY BATCH;
+cqlsh:employee> BEGIN BATCH
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (001, '2020-03-13','TESTING', 'JR ASST', 'MANU', 3000)
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (121, '2020-04-28','SECUIRTY', 'SR ASST', 'PRAMOD', 5000)
+            ... APPLY BATCH;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name | designation | emp_name | salary
+--------+---------------------------------+-----------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |   TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  SECUIRTY |     SR ASST |   PRAMOD |   5000
+
+(2 rows)
+cqlsh:employee> UPDATE employee_info SET emp_name='Rajath', dept_name='OPERATIONS' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+
+(2 rows)
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000);
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info order by salary;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> SORT SALARY FROM EMPLOYEE_INFO
+            ... ;
+SyntaxException: line 1:0 no viable alternative at input 'SORT' ([SORT]...)
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY salary ASC;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000)
+cqlsh:employee> select * from employee_info ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info WHERE date_of_joining>='2020-03-01'  ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+cqlsh:employee> alter emp_info
+            ... ADD PROJECT TYPE TEXT
+            ... ;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter emp_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'employee_info' ([alter] employee_info...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:43 mismatched input 'TEXT' expecting EOF (...table employee_info ADD PROJECT TYPE [TEXT]...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...table employee_info ADD PROJECT TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project text;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |    null |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='TESTING' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='P1' WHERE emp_id=1;
+cqlsh:employee> UPDATE employee_info SET project='P2' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> update employee_info USING TTL 50 SET dept_name='DEVELOPMENT' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+bmsce@bmsce-Precision-T1700:~$ cd cassandra
+bmsce@bmsce-Precision-T1700:~/cassandra$ cd apache-cassandra-3.11.0
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0$ cd bin
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0/bin$ ./cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 3.11.4 | CQL spec 3.4.4 | Native protocol v4]
+Use HELP for help.
+cqlsh> CREATE KEYSPACE employee WITH REPLICATION={'class':'SimpleStrategy','replication_factor':1};
+cqlsh> Describe keyspaces
+
+system_schema  system_auth  system  system_distributed  employee  system_traces
+
+cqlsh> USE employee
+   ... l
+   ... 
+cqlsh> USE employee;
+cqlsh:employee> CREATE TABLE employee_info(
+            ... emp_id int PRIMARY KEY,
+            ... emp_name text,
+            ... designation text,
+            ... date_of_joining timestamp,
+            ... salary double,
+            ... dept_name text);
+cqlsh:employee> DESCRIBE tables
+
+employee_info
+
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining | dept_name | designation | emp_name | salary
+--------+-----------------+-----------+-------------+----------+--------
+
+(0 rows)
+cqlsh:employee> BEGIN BATCH
+            ...                ... INSERT INTO 
+            ...                ... student_info(RollNo,StudName,DateofJoining,LastExamPercent)
+            ...                ... VALUES(1,'Micheal Storm','2012-03-29',69.6)
+            ...                ... INSERT INTO student_info
+            ...                ... (RollNo,StudName,DateofJoining,LastExamPercent) VALUES
+            ...                ... (2,'Stephen Fox','2013-02-27',72.5)
+            ...                ... APPLY BATCH;
+cqlsh:employee> BEGIN BATCH
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (001, '2020-03-13','TESTING', 'JR ASST', 'MANU', 3000)
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (121, '2020-04-28','SECUIRTY', 'SR ASST', 'PRAMOD', 5000)
+            ... APPLY BATCH;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name | designation | emp_name | salary
+--------+---------------------------------+-----------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |   TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  SECUIRTY |     SR ASST |   PRAMOD |   5000
+
+(2 rows)
+cqlsh:employee> UPDATE employee_info SET emp_name='Rajath', dept_name='OPERATIONS' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+
+(2 rows)
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000);
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info order by salary;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> SORT SALARY FROM EMPLOYEE_INFO
+            ... ;
+SyntaxException: line 1:0 no viable alternative at input 'SORT' ([SORT]...)
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY salary ASC;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000)
+cqlsh:employee> select * from employee_info ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info WHERE date_of_joining>='2020-03-01'  ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+cqlsh:employee> alter emp_info
+            ... ADD PROJECT TYPE TEXT
+            ... ;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter emp_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'employee_info' ([alter] employee_info...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:43 mismatched input 'TEXT' expecting EOF (...table employee_info ADD PROJECT TYPE [TEXT]...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...table employee_info ADD PROJECT TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project text;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |    null |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='TESTING' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='P1' WHERE emp_id=1;
+cqlsh:employee> UPDATE employee_info SET project='P2' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> update employee_info USING TTL 50 SET dept_name='DEVELOPMENT' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+bmsce@bmsce-Precision-T1700:~$ cd cassandra
+bmsce@bmsce-Precision-T1700:~/cassandra$ cd apache-cassandra-3.11.0
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0$ cd bin
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0/bin$ ./cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 3.11.4 | CQL spec 3.4.4 | Native protocol v4]
+Use HELP for help.
+cqlsh> CREATE KEYSPACE employee WITH REPLICATION={'class':'SimpleStrategy','replication_factor':1};
+cqlsh> Describe keyspaces
+
+system_schema  system_auth  system  system_distributed  employee  system_traces
+
+cqlsh> USE employee
+   ... l
+   ... 
+cqlsh> USE employee;
+cqlsh:employee> CREATE TABLE employee_info(
+            ... emp_id int PRIMARY KEY,
+            ... emp_name text,
+            ... designation text,
+            ... date_of_joining timestamp,
+            ... salary double,
+            ... dept_name text);
+cqlsh:employee> DESCRIBE tables
+
+employee_info
+
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining | dept_name | designation | emp_name | salary
+--------+-----------------+-----------+-------------+----------+--------
+
+(0 rows)
+cqlsh:employee> BEGIN BATCH
+            ...                ... INSERT INTO 
+            ...                ... student_info(RollNo,StudName,DateofJoining,LastExamPercent)
+            ...                ... VALUES(1,'Micheal Storm','2012-03-29',69.6)
+            ...                ... INSERT INTO student_info
+            ...                ... (RollNo,StudName,DateofJoining,LastExamPercent) VALUES
+            ...                ... (2,'Stephen Fox','2013-02-27',72.5)
+            ...                ... APPLY BATCH;
+cqlsh:employee> BEGIN BATCH
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (001, '2020-03-13','TESTING', 'JR ASST', 'MANU', 3000)
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (121, '2020-04-28','SECUIRTY', 'SR ASST', 'PRAMOD', 5000)
+            ... APPLY BATCH;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name | designation | emp_name | salary
+--------+---------------------------------+-----------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |   TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  SECUIRTY |     SR ASST |   PRAMOD |   5000
+
+(2 rows)
+cqlsh:employee> UPDATE employee_info SET emp_name='Rajath', dept_name='OPERATIONS' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+
+(2 rows)
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000);
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info order by salary;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> SORT SALARY FROM EMPLOYEE_INFO
+            ... ;
+SyntaxException: line 1:0 no viable alternative at input 'SORT' ([SORT]...)
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY salary ASC;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000)
+cqlsh:employee> select * from employee_info ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info WHERE date_of_joining>='2020-03-01'  ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+cqlsh:employee> alter emp_info
+            ... ADD PROJECT TYPE TEXT
+            ... ;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter emp_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'employee_info' ([alter] employee_info...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:43 mismatched input 'TEXT' expecting EOF (...table employee_info ADD PROJECT TYPE [TEXT]...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...table employee_info ADD PROJECT TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project text;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |    null |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='TESTING' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='P1' WHERE emp_id=1;
+cqlsh:employee> UPDATE employee_info SET project='P2' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> update employee_info USING TTL 50 SET dept_name='DEVELOPMENT' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+bmsce@bmsce-Precision-T1700:~$ cd cassandra
+bmsce@bmsce-Precision-T1700:~/cassandra$ cd apache-cassandra-3.11.0
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0$ cd bin
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0/bin$ ./cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 3.11.4 | CQL spec 3.4.4 | Native protocol v4]
+Use HELP for help.
+cqlsh> CREATE KEYSPACE employee WITH REPLICATION={'class':'SimpleStrategy','replication_factor':1};
+cqlsh> Describe keyspaces
+
+system_schema  system_auth  system  system_distributed  employee  system_traces
+
+cqlsh> USE employee
+   ... l
+   ... 
+cqlsh> USE employee;
+cqlsh:employee> CREATE TABLE employee_info(
+            ... emp_id int PRIMARY KEY,
+            ... emp_name text,
+            ... designation text,
+            ... date_of_joining timestamp,
+            ... salary double,
+            ... dept_name text);
+cqlsh:employee> DESCRIBE tables
+
+employee_info
+
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining | dept_name | designation | emp_name | salary
+--------+-----------------+-----------+-------------+----------+--------
+
+(0 rows)
+cqlsh:employee> BEGIN BATCH
+            ...                ... INSERT INTO 
+            ...                ... student_info(RollNo,StudName,DateofJoining,LastExamPercent)
+            ...                ... VALUES(1,'Micheal Storm','2012-03-29',69.6)
+            ...                ... INSERT INTO student_info
+            ...                ... (RollNo,StudName,DateofJoining,LastExamPercent) VALUES
+            ...                ... (2,'Stephen Fox','2013-02-27',72.5)
+            ...                ... APPLY BATCH;
+cqlsh:employee> BEGIN BATCH
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (001, '2020-03-13','TESTING', 'JR ASST', 'MANU', 3000)
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (121, '2020-04-28','SECUIRTY', 'SR ASST', 'PRAMOD', 5000)
+            ... APPLY BATCH;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name | designation | emp_name | salary
+--------+---------------------------------+-----------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |   TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  SECUIRTY |     SR ASST |   PRAMOD |   5000
+
+(2 rows)
+cqlsh:employee> UPDATE employee_info SET emp_name='Rajath', dept_name='OPERATIONS' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+
+(2 rows)
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000);
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info order by salary;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> SORT SALARY FROM EMPLOYEE_INFO
+            ... ;
+SyntaxException: line 1:0 no viable alternative at input 'SORT' ([SORT]...)
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY salary ASC;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000)
+cqlsh:employee> select * from employee_info ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info WHERE date_of_joining>='2020-03-01'  ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+cqlsh:employee> alter emp_info
+            ... ADD PROJECT TYPE TEXT
+            ... ;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter emp_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'employee_info' ([alter] employee_info...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:43 mismatched input 'TEXT' expecting EOF (...table employee_info ADD PROJECT TYPE [TEXT]...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...table employee_info ADD PROJECT TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project text;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |    null |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='TESTING' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='P1' WHERE emp_id=1;
+cqlsh:employee> UPDATE employee_info SET project='P2' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> update employee_info USING TTL 50 SET dept_name='DEVELOPMENT' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+bmsce@bmsce-Precision-T1700:~$ cd cassandra
+bmsce@bmsce-Precision-T1700:~/cassandra$ cd apache-cassandra-3.11.0
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0$ cd bin
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0/bin$ ./cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 3.11.4 | CQL spec 3.4.4 | Native protocol v4]
+Use HELP for help.
+cqlsh> CREATE KEYSPACE employee WITH REPLICATION={'class':'SimpleStrategy','replication_factor':1};
+cqlsh> Describe keyspaces
+
+system_schema  system_auth  system  system_distributed  employee  system_traces
+
+cqlsh> USE employee
+   ... l
+   ... 
+cqlsh> USE employee;
+cqlsh:employee> CREATE TABLE employee_info(
+            ... emp_id int PRIMARY KEY,
+            ... emp_name text,
+            ... designation text,
+            ... date_of_joining timestamp,
+            ... salary double,
+            ... dept_name text);
+cqlsh:employee> DESCRIBE tables
+
+employee_info
+
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining | dept_name | designation | emp_name | salary
+--------+-----------------+-----------+-------------+----------+--------
+
+(0 rows)
+cqlsh:employee> BEGIN BATCH
+            ...                ... INSERT INTO 
+            ...                ... student_info(RollNo,StudName,DateofJoining,LastExamPercent)
+            ...                ... VALUES(1,'Micheal Storm','2012-03-29',69.6)
+            ...                ... INSERT INTO student_info
+            ...                ... (RollNo,StudName,DateofJoining,LastExamPercent) VALUES
+            ...                ... (2,'Stephen Fox','2013-02-27',72.5)
+            ...                ... APPLY BATCH;
+cqlsh:employee> BEGIN BATCH
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (001, '2020-03-13','TESTING', 'JR ASST', 'MANU', 3000)
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (121, '2020-04-28','SECUIRTY', 'SR ASST', 'PRAMOD', 5000)
+            ... APPLY BATCH;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name | designation | emp_name | salary
+--------+---------------------------------+-----------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |   TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  SECUIRTY |     SR ASST |   PRAMOD |   5000
+
+(2 rows)
+cqlsh:employee> UPDATE employee_info SET emp_name='Rajath', dept_name='OPERATIONS' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+
+(2 rows)
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000);
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info order by salary;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> SORT SALARY FROM EMPLOYEE_INFO
+            ... ;
+SyntaxException: line 1:0 no viable alternative at input 'SORT' ([SORT]...)
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY salary ASC;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000)
+cqlsh:employee> select * from employee_info ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info WHERE date_of_joining>='2020-03-01'  ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+cqlsh:employee> alter emp_info
+            ... ADD PROJECT TYPE TEXT
+            ... ;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter emp_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'employee_info' ([alter] employee_info...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:43 mismatched input 'TEXT' expecting EOF (...table employee_info ADD PROJECT TYPE [TEXT]...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...table employee_info ADD PROJECT TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project text;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |    null |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='TESTING' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='P1' WHERE emp_id=1;
+cqlsh:employee> UPDATE employee_info SET project='P2' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> update employee_info USING TTL 50 SET dept_name='DEVELOPMENT' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+bmsce@bmsce-Precision-T1700:~$ cd cassandra
+bmsce@bmsce-Precision-T1700:~/cassandra$ cd apache-cassandra-3.11.0
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0$ cd bin
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0/bin$ ./cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 3.11.4 | CQL spec 3.4.4 | Native protocol v4]
+Use HELP for help.
+cqlsh> CREATE KEYSPACE employee WITH REPLICATION={'class':'SimpleStrategy','replication_factor':1};
+cqlsh> Describe keyspaces
+
+system_schema  system_auth  system  system_distributed  employee  system_traces
+
+cqlsh> USE employee
+   ... l
+   ... 
+cqlsh> USE employee;
+cqlsh:employee> CREATE TABLE employee_info(
+            ... emp_id int PRIMARY KEY,
+            ... emp_name text,
+            ... designation text,
+            ... date_of_joining timestamp,
+            ... salary double,
+            ... dept_name text);
+cqlsh:employee> DESCRIBE tables
+
+employee_info
+
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining | dept_name | designation | emp_name | salary
+--------+-----------------+-----------+-------------+----------+--------
+
+(0 rows)
+cqlsh:employee> BEGIN BATCH
+            ...                ... INSERT INTO 
+            ...                ... student_info(RollNo,StudName,DateofJoining,LastExamPercent)
+            ...                ... VALUES(1,'Micheal Storm','2012-03-29',69.6)
+            ...                ... INSERT INTO student_info
+            ...                ... (RollNo,StudName,DateofJoining,LastExamPercent) VALUES
+            ...                ... (2,'Stephen Fox','2013-02-27',72.5)
+            ...                ... APPLY BATCH;
+cqlsh:employee> BEGIN BATCH
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (001, '2020-03-13','TESTING', 'JR ASST', 'MANU', 3000)
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (121, '2020-04-28','SECUIRTY', 'SR ASST', 'PRAMOD', 5000)
+            ... APPLY BATCH;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name | designation | emp_name | salary
+--------+---------------------------------+-----------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |   TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  SECUIRTY |     SR ASST |   PRAMOD |   5000
+
+(2 rows)
+cqlsh:employee> UPDATE employee_info SET emp_name='Rajath', dept_name='OPERATIONS' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+
+(2 rows)
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000);
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info order by salary;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> SORT SALARY FROM EMPLOYEE_INFO
+            ... ;
+SyntaxException: line 1:0 no viable alternative at input 'SORT' ([SORT]...)
+cqlsh:employee> select * from employee_info order by emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY emp_id;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info ORDER BY salary ASC;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000)
+cqlsh:employee> select * from employee_info ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:employee> select * from employee_info WHERE date_of_joining>='2020-03-01'  ORDER BY salary DESC ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+cqlsh:employee> alter emp_info
+            ... ADD PROJECT TYPE TEXT
+            ... ;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter emp_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'emp_info' ([alter] emp_info...)
+cqlsh:employee> alter employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:6 no viable alternative at input 'employee_info' ([alter] employee_info...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE TEXT;
+SyntaxException: line 1:43 mismatched input 'TEXT' expecting EOF (...table employee_info ADD PROJECT TYPE [TEXT]...)
+cqlsh:employee> alter table employee_info ADD PROJECT TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...table employee_info ADD PROJECT TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project TYPE text;
+SyntaxException: line 1:43 mismatched input 'text' expecting EOF (...TABLE employee_info ADD project TYPE [text]...)
+cqlsh:employee> ALTER TABLE employee_info ADD project text;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |    null |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET probmsce@bmsce-Precision-T1700:~$ cd cassandra
+bmsce@bmsce-Precision-T1700:~/cassandra$ cd apache-cassandra-3.11.0
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0$ cd bin
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0/bin$ ./cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 3.11.4 | CQL spec 3.4.4 | Native protocol v4]
+Use HELP for help.
+cqlsh> CREATE KEYSPACE employee WITH REPLICATION={'class':'SimpleStrategy','replication_factor':1};
+cqlsh> Describe keyspaces
+
+system_schema  system_auth  system  system_distributed  employee  system_traces
+
+cqlsh> USE employee
+   ... l
+   ... 
+cqlsh> USE employee;
+cqlsh:employee> CREATE TABLE employee_info(
+            ... emp_id int PRIMARY KEY,
+            ... emp_name text,
+            ... designation text,
+            ... date_of_joining timestamp,
+            ... salary double,
+            ... dept_name text);
+cqlsh:employee> DESCRIBE tables
+
+employee_info
+
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining | dept_name | designation | emp_name | salary
+--------+-----------------+-----------+-------------+----------+--------
+
+(0 rows)
+cqlsh:employee> BEGIN BATCH
+            ...                ... INSERT INTO 
+            ...                ... student_info(RollNo,StudName,DateofJoining,LastExamPercent)
+            ...                ... VALUES(1,'Micheal Storm','2012-03-29',69.6)
+            ...                ... INSERT INTO student_info
+            ...                ... (RollNo,StudName,DateofJoining,LastExamPercent) VALUES
+            ...                ... (2,'Stephen Fox','2013-02-27',72.5)
+            ...                ... APPLY BATCH;
+cqlsh:employee> BEGIN BATCH
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (001, '2020-03-13','TESTING', 'JR ASST', 'MANU', 3000)
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (121, '2020-04-28','SECUIRTY', 'SR ASST', 'PRAMOD', 5000)
+            ... APPLY BATCH;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name | designation | emp_name | salary
+--------+---------------------------------+-----------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |   TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  SECUIRTY |     SR ASST |   PRAMOD |   5000
+
+(2 rows)
+cqlsh:employee> UPDATE employee_info SET emp_name='Rajath', dept_name='OPERATIONS' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+
+(2 rows)
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000);
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |   1000
+
+(3 rows)
+cqlsh:employee> ALTER TABLE employee_info ADD project text;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |    null |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='TESTING' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='P1' WHERE emp_id=1;
+cqlsh:employee> UPDATE employee_info SET project='P2' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)1859
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+cqlsh:employee> update employee_info USING TTL 50 SET dept_name='DEVELOPMENT' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+--1859
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+-----------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;1859
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  1859
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+1859
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | D1859
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+EVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+bmsce@bmsce-Precision-T1700:~$ cd cassandra
+bmsce@bmsce-Precision-T1700:~/cassandra$ cd apache-cassandra-3.11.0
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0$ cd bin
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0/bin$ ./cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.1859
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+[cqlsh 5.0.1 | Cassandra 3.11.4 | CQL spec 3.4.4 | Native protocol v4]
+Use HELP for help.
+cqlsh> CREATE KEYSPACE employee WITH REPLICATION={'class':'SimpleStrategy','replication_factor':1};
+cqlsh> Describe keyspaces
+1859
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+system_schema  system_auth  system  system_distributed  employee  system_traces
+
+cqlsh> USE employee
+   ... l
+   ... 
+cqlsh> USE employee;
+cqlsh:employee> CREATE TABLE employee_info(
+            ... emp_id int PRIMARY KEY,
+            ... emp_name text,
+            ... designation text,
+            ... date_of_joining timestamp,
+            ... salary double,
+            ... dept_name text);
+cqlsh:employee> DESCRIBE tables
+
+employee_info
+
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining | dept_name | designation | emp_name | salary
+--------+-----------------+-----------+-------------+----------+--------
+
+(0 rows)
+cqlsh:employee> BEGIN BATCH
+            ...                ... INSERT INTO 
+            ...                ... student_info(RollNo,StudName,DateofJoining,LastExamPercent)
+            ...                ... VALUES(1,'Micheal Storm','2012-03-29',69.6)
+            ...                ... INSERT INTO student_info
+            ...                ... (RollNo,StudName,DateofJoining,LastExamPercent) VALUES
+            ...                ... (2,'Stephen Fox','2013-02-27',72.5)
+            ...                ... APPLY BATCH;
+cqlsh:employee> BEGIN BATCH
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (001, '2020-03-13','TESTING', 'JR ASST', 'MANU', 3000)
+            ... INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (121, '2020-04-28','SECUIRTY', 'SR ASST', 'PRAMOD', 5000)
+            ... APPLY BATCH;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name | designation | emp_name | salary
+--------+---------------------------------+-----------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |   TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  SECUIRTY |     SR ASST |   PRAMOD |   5000
+
+(2 rows)
+cqlsh:employee> UPDATE employee_info SET emp_name='Rajath', dept_name='OPERATIONS' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+
+(2 rows)
+cqlsh:employee> INSERT INTO employee_info (emp_id, date_of_joining, dept_name, designation, emp_name, salary)
+            ... VALUES (009, '2020-03-13','SECURITY', 'JR ASST', 'NITISH', 1000);
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | salary
+--------+---------------------------------+------------+-------------+----------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |   1000
+
+(3 rows)
+
+cqlsh:employee> ALTER TABLE employee_info ADD project text;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath |    null |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='TESTING' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='P1' WHERE emp_id=1;
+cqlsh:employee> UPDATE employee_info SET project='P2' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> update employee_info USING TTL 50 SET dept_name='DEVELOPMENT' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |       null |     JR ASST |   NITISH |      P2 |   1000
+
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |       null |     JR ASST |   NITISH |      P2 |   1000
+
+ject='TESTING' WHERE emp_id=121;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |    null |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |    null |   1000
+
+(3 rows)
+cqlsh:employee> UPDATE employee_info SET project='P1' WHERE emp_id=1;
+cqlsh:employee> UPDATE employee_info SET project='P2' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> update employee_info USING TTL 50 SET dept_name='DEVELOPMENT' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |       null |     JR ASST |   NITISH |      P2 |   1000
+
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |       null |     JR ASST |   NITISH |      P2 |   1000
+
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |       null |     JR ASST |   NITISH |      P2 |   1000
+
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |       null |     JR ASST |   NITISH |      P2 |   1000
+
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |       null |     JR ASST |   NITISH |      P2 |   1000
+
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |       null |     JR ASST |   NITISH |      P2 |   1000
+
+
+cqlsh:employee> UPDATE employee_info SET project='P1' WHERE emp_id=1;
+cqlsh:employee> UPDATE employee_info SET project='P2' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |   SECURITY |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> update employee_info USING TTL 50 SET dept_name='DEVELOPMENT' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |       null |     JR ASST |   NITISH |      P2 |   1000
+
+ SECURITY |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> update employee_info USING TTL 50 SET dept_name='DEVELOPMENT' WHERE emp_id=9;
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |       null |     JR ASST |   NITISH |      P2 |   1000
+
+ept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name   | designation | emp_name | project | salary
+--------+---------------------------------+-------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |     TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 |  OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 | DEVELOPMENT |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |       null |     JR ASST |   NITISH |      P2 |   1000
+
+(3 rows)
+cqlsh:employee> select * from employee_info;
+
+ emp_id | date_of_joining                 | dept_name  | designation | emp_name | project | salary
+--------+---------------------------------+------------+-------------+----------+---------+--------
+      1 | 2020-03-12 18:30:00.000000+0000 |    TESTING |     JR ASST |     MANU |      P1 |   3000
+    121 | 2020-04-27 18:30:00.000000+0000 | OPERATIONS |     SR ASST |   Rajath | TESTING |   5000
+      9 | 2020-03-12 18:30:00.000000+0000 |       null |     JR ASST |   NITISH |      P2 |   1000
+
