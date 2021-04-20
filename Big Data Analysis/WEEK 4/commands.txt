@@ -1,0 +1,114 @@
+nitsh@Nitish:/usr/local/hadoop/bin$ sudo su hduser
+[sudo] password for nitsh: 
+
+
+hduser@Nitish:/usr/local/hadoop/bin$ hadoop version
+Hadoop 2.10.1
+Subversion https://github.com/apache/hadoop -r 1827467c9a56f133025f28557bfc2c562d78e816
+Compiled by centos on 2020-09-14T13:17Z
+Compiled with protoc 2.5.0
+From source with checksum 3114edef868f1f3824e7d0f68be03650
+This command was run using /usr/local/hadoop/share/hadoop/common/hadoop-common-2.10.1.jar
+
+hduser@Nitish:/usr/local/hadoop/bin$ cd ~
+
+hduser@Nitish:~$ start-all.sh
+
+
+hduser@Nitish:~$ jps
+19521 Jps
+17825 DataNode
+18275 ResourceManager
+18085 SecondaryNameNode
+17607 NameNode
+18446 NodeManager
+
+
+1)
+hduser@Nitish:~$ hadoop fs -mkdir /newDataFlair
+
+
+2)
+hduser@Nitish:~$ hadoop fs -ls /
+Found 1 items
+drwxr-xr-x   - hduser supergroup          0 2021-04-20 15:24 /newDataFlair
+
+
+3)
+hduser@Nitish:~$ hdfs dfs -copyFromLocal ~/temp.txt /newDataFlair
+hduser@Nitish:~$ hdfs dfs -ls /newDataFlair
+Found 1 items
+-rw-r--r--   1 hduser supergroup         18 2021-04-20 20:59 /newDataFlair/temp.txt
+
+
+4)
+hduser@Nitish:~$ hadoop fs -count -q /newDataFlair
+        none             inf            none             inf            1            1                 18 /newDataFlair
+
+
+5)
+hduser@Nitish:~$ hdfs dfs -cat /newDataFlair/temp.txt
+Nitish N Banakar
+
+
+6)
+hduser@Nitish:~$ hadoop fs -appendToFile ~/nitish.txt /newDataFlair/temp.txt
+hduser@Nitish:~$ hdfs dfs -cat /newDataFlair/temp.txt
+Nitish N Banakar
+
+1BM18CS065
+
+
+7)
+hduser@Nitish:~$ hdfs dfs -mkdir /sample
+hduser@Nitish:~$ hdfs dfs -cp /newDataFlair/temp.txt /sample/copyfile
+hduser@Nitish:~$ hdfs dfs -cat /sample/copyfile
+Nitish N Banakar
+
+1BM18CS065
+
+
+
+8)
+hduser@Nitish:~$ hadoop fs -du -h -x /sample/copyfile
+33  /sample/copyfile
+
+
+
+9)
+hduser@Nitish:~$ hadoop fs -mkdir /dataflair
+hduser@Nitish:~$ hadoop fs -mv /newDataFlair/temp.txt /dataflair
+hduser@Nitish:~$ hadoop fs -ls /dataflair
+Found 1 items
+-rw-r--r--   1 hduser supergroup         33 2021-04-20 21:13 /dataflair/temp.txt
+
+
+10)
+hduser@Nitish:~$ hadoop fs -rm /sample/copyfile
+Deleted /sample/copyfile
+hduser@Nitish:~$ hadoop fs -rm -R /newDataFlair
+Deleted /newDataFlair
+hduser@Nitish:~$ hadoop fs -ls / 
+Found 2 items
+drwxr-xr-x   - hduser supergroup          0 2021-04-20 21:25 /dataflair
+drwxr-xr-x   - hduser supergroup          0 2021-04-20 21:27 /sample
+
+
+
+11)
+hduser@Nitish:~$ hadoop fs -appendToFile ~/nitish.txt /dataflair/temp.txt
+hduser@Nitish:~$ hdfs dfs -cat /dataflair/temp.txt
+1BM18CS065
+hduser@Nitish:~$ hadoop fs -truncate 3 /dataflair/temp.txt
+hduser@Nitish:~$ hdfs dfs -cat /dataflair/temp.txt
+
+hduser@Nitish:~$
+
+
+
+
+
+
+
+
+
