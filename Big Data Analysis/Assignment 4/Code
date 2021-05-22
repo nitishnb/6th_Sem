@@ -142,4 +142,5 @@ scala> val result = itr.cartesian(itr2)
 result: org.apache.spark.rdd.RDD[(Int, Int)] = CartesianRDD[2] at cartesian at <console>:27
 
 scala> println(result.collect().mkString(", "))
-[Stage 0:======================================>                                                          (1,3), (1,4), (1,5), (1,6), (2,3), (2,4), (2,5), (2,6)
+[Stage 0:======================================>  
+(1,3), (1,4), (1,5), (1,6), (2,3), (2,4), (2,5), (2,6)
