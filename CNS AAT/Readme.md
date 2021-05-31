@@ -23,4 +23,4 @@ To encipher your own messages in python, you can use the pycipher module. To ins
 ```
 
 ## Cryptanalysis 
-The Atbash cipher is trivial to break since there is no key, as soon as you know it is an Atbash cipher you can simply decrypt it. If you didn't know it was an Atbash cipher, you could break it by assuming the ciphertext is a substitution cipher, which can still be easily broken. Alternatively, it can be broken if it is assumed to be an Affine cipher.
+The Atbash cipher is trivial to break since there is no key, as soon as you know it is an Atbash cipher you can simply decrypt it. If you didn't know it was an Atbash cipher, you could break it by assuming the ciphertext is a substitution cipher, which can still be easily broken, [check here](https://github.com/nitishnb/6th_Sem/blob/main/CNS%20AAT/break_simplesub_2.ipynb). Alternatively, it can be broken if it is assumed to be an [Affine cipher](https://github.com/nitishnb/6th_Sem/blob/main/CNS%20AAT/break_atbash_cipher.ipynb).
