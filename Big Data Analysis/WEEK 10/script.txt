@@ -1,0 +1,38 @@
+nitsh@Nitish:~$ spark-shell
+Welcome to
+      ____              __
+     / __/__  ___ _____/ /__
+    _\ \/ _ \/ _ `/ __/  '_/
+   /___/ .__/\_,_/_/ /_/\_\   version 3.1.1
+      /_/
+         
+Using Scala version 2.12.10 (OpenJDK 64-Bit Server VM, Java 11.0.10)
+Type in expressions to have them evaluated.
+Type :help for more information.
+
+scala> val textfile = sc.textFile("/home/nitsh/WEEK 10/input.txt")
+textfile: org.apache.spark.rdd.RDD[String] = /home/nitsh/WEEK 10/input.txt MapPartitionsRDD[1] at textFile at <console>:24
+
+scala> val counts = textfile.flatMap(line => line.split(" ")).map(word => (word,1)).reduceByKey(_ + _)
+counts: org.apache.spark.rdd.RDD[(String, Int)] = ShuffledRDD[4] at reduceByKey at <console>:25
+
+scala> import scala.collection.immutable.ListMap
+import scala.collection.immutable.ListMap
+
+scala> val sorted = ListMap(counts.collect.sortWith(_._2 > _._2):_*)
+[Stage 0:>                                                          (0 + 2)                                                                           sorted: scala.collection.immutable.ListMap[String,Int] = ListMap(car -> 7, deer -> 5, bear -> 3, river -> 3)
+
+scala> println(sorted)
+ListMap(car -> 7, deer -> 5, bear -> 3, river -> 3)
+
+scala> for((k,v)<-sorted)
+     | {
+     |  if(v>4)
+     |  {
+     |   println(k+" - "+v)
+     |  }
+     | }
+car - 7
+deer - 5
+
+scala> 
